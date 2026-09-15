@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Coordinate Zero — a minimalist geography game. Follow the clues, place your pin, and chase a perfect score."
+    />
+    <meta name="theme-color" content="#08111f" />
+    <title>Coordinate Zero — Geography, distilled.</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="locations.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Coordinate Zero home">
+        <span class="brand-mark" aria-hidden="true">⌖</span>
+        <span>Coordinate Zero</span>
+      </a>
+      <div class="topbar-actions">
+        <button class="icon-button" id="howToButton" type="button" aria-label="How to play">?</button>
+        <button class="icon-button" id="soundButton" type="button" aria-label="Mute sounds" aria-pressed="false">◖</button>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="game-card" id="gameCard" aria-labelledby="roundTitle">
+        <div class="status-row">
+          <div>
+            <span class="eyebrow" id="roundTitle">Round 1 of 5</span>
+            <div class="progress" aria-label="Game progress">
+              <span class="progress-fill" id="progressFill"></span>
+            </div>
+          </div>
+          <div class="score-block">
+            <span class="score-label">Score</span>
+            <strong id="score">0</strong>
+            <span class="score-max">/ 5,000</span>
+          </div>
+        </div>
+
+        <div class="clue-panel">
+          <div class="clue-heading">
+            <span class="clue-number" id="clueNumber">Clue 01</span>
+            <span class="clue-cost" id="clueCost">Worth up to 1,000 pts</span>
+          </div>
+          <p class="clue-text" id="clueText" aria-live="polite"></p>
+          <div class="clue-dots" id="clueDots" aria-label="Clues revealed"></div>
+          <button class="text-button" id="revealButton" type="button">
+            Reveal another clue <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <div class="map-wrap" id="mapWrap">
+          <svg
+            class="world-map"
+            id="worldMap"
+            viewBox="0 0 1000 500"
+            role="img"
+            aria-labelledby="mapTitle mapDescription"
+            tabindex="0"
+          >
+            <title id="mapTitle">Interactive world map</title>
+            <desc id="mapDescription">Click or use arrow keys to position your guess, then submit it.</desc>
+            <defs>
+              <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                <path d="M 50 0 L 0 0 0 50" class="map-grid-line" />
+              </pattern>
+              <radialGradient id="oceanGlow" cx="50%" cy="45%" r="70%">
+                <stop offset="0" stop-color="#153653" />
+                <stop offset="1" stop-color="#091827" />
+              </radialGradient>
+              <filter id="pinGlow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+            <rect width="1000" height="500" rx="16" fill="url(#oceanGlow)" />
+            <rect width="1000" height="500" rx="16" fill="url(#grid)" />
+            <g class="continents" aria-hidden="true">
+              <path d="M69 111 99 76l84-32 83 9 48 33-14 37-32 10-11 36-36 8-23 32-27-6-19 40-29-18-10-44-37-25Z" />
+              <path d="m245 237 49 22 35 48-8 46-25 53-16 52-25-31-11-53-24-49 8-41-19-24Z" />
+              <path d="m412 92 48-24 57 10 20 26 43-8 43 21 42-11 63 20 80 5 57 38-14 30-54 13-31-8-49 26-57-5-46 20-32-16-35 3-22-32-35 2-31-25-45-5-29-32Z" />
+              <path d="m456 215 70 8 47 34 10 51-31 73-34 51-35-25-7-50-27-39-16-62Z" />
+              <path d="m776 335 49-34 71 10 38 35-18 43-55 8-39-23-33 9-26-25Z" />
+              <path d="m901 424 23-9 18 14-20 19Z" />
+              <path d="M392 80 371 45l25-22 31 19-6 33Z" />
+            </g>
+            <g id="answerLine" class="answer-line" hidden>
+              <line id="resultLine" />
+            </g>
+            <g id="targetMarker" class="target-marker" hidden>
+              <circle r="14" />
+              <circle r="4" />
+            </g>
+            <g id="guessMarker" class="guess-marker" hidden filter="url(#pinGlow)">
+              <circle class="pin-pulse" r="20" />
+              <circle class="pin-core" r="7" />
+              <path d="M0 7 0 25" />
+            </g>
+            <text class="map-hint" id="mapHint" x="500" y="468" text-anchor="middle">PLACE YOUR PIN</text>
+          </svg>
+        </div>
+
+        <div class="result-panel" id="resultPanel" hidden aria-live="polite">
+          <div>
+            <span class="result-kicker">The answer was</span>
+            <h2 id="answerName"></h2>
+            <p id="answerFact"></p>
+          </div>
+          <div class="result-stats">
+            <div><strong id="distanceResult">0 km</strong><span>away</span></div>
+            <div><strong id="pointsResult">+0</strong><span>points</span></div>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <p class="selection-status" id="selectionStatus">Click anywhere on the map to make your guess.</p>
+          <button class="primary-button" id="submitButton" type="button" disabled>Lock in guess</button>
+          <button class="primary-button" id="nextButton" type="button" hidden>Next location</button>
+        </div>
+      </section>
+
+      <section class="start-screen" id="startScreen" aria-labelledby="startTitle">
+        <div class="start-symbol" aria-hidden="true"><span>⌖</span></div>
+        <p class="eyebrow">A five-round geography game</p>
+        <h1 id="startTitle">How well do you<br />know the world?</h1>
+        <p class="start-copy">Read the clue. Place your pin. The closer you land, the higher you score.</p>
+        <button class="primary-button large" id="startButton" type="button">Start exploring</button>
+        <div class="best-score" id="bestScoreText">Personal best —</div>
+      </section>
+
+      <section class="end-screen" id="endScreen" aria-labelledby="endTitle" hidden>
+        <p class="eyebrow">Expedition complete</p>
+        <h1 id="endTitle">Final score</h1>
+        <div class="final-score" id="finalScore">0</div>
+        <p class="rank-message" id="rankMessage"></p>
+        <div class="round-summary" id="roundSummary"></div>
+        <div class="end-actions">
+          <button class="primary-button" id="playAgainButton" type="button">Play again</button>
+          <button class="secondary-button" id="shareButton" type="button">Copy result</button>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="modal" id="howToDialog">
+      <button class="modal-close" id="closeDialogButton" type="button" aria-label="Close">×</button>
+      <span class="eyebrow">Field notes</span>
+      <h2>How to play</h2>
+      <ol>
+        <li><span>01</span><p>Read the first clue and click the map where you think the location is.</p></li>
+        <li><span>02</span><p>Need help? Reveal up to two more clues. Each one lowers the available points.</p></li>
+        <li><span>03</span><p>Complete five locations. Distance and clue count determine your final score.</p></li>
+      </ol>
+      <p class="keyboard-note">Keyboard: focus the map, move with arrow keys, then press Enter.</p>
+    </dialog>
+
+    <footer>
+      <span>Made for curious people.</span>
+      <span>Data stays in your browser.</span>
+    </footer>
+  </body>
+</html>
