@@ -60,6 +60,3 @@ Colours, spacing, and typography are controlled by variables at the top of `styl
 
 The game uses the Haversine formula to calculate the great-circle distance between the guessed and actual coordinates. Distance reduces the base score exponentially. Revealing clue two costs 150 available points; clue three costs 300.
 
-## License
-
-MIT — use it, change it, and make it yours.
